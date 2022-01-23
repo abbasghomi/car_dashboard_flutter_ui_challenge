@@ -61,10 +61,10 @@ class _HomePageState extends State<HomePage> {
                   //   ),
                   // ),
                   CustomPaint(
-                    size: const Size(1600.0, 1600.0),
+                    size: const Size(400.0, 400.0),
                     painter: GaugeProgressIndicator(
                       bgColor: Colors.green,
-                      width: 100.0,
+                      width: 10.0,
                       lineColor: Colors.red,
                       percent: context.read<SpeedometerCubit>().speed,
                     ),
