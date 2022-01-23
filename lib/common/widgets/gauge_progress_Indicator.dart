@@ -70,9 +70,9 @@ class GaugeProgressIndicator extends CustomPainter {
       endValue: endValue,
       currentValue: currentValue,
       fillDirection: FillDirection.clockWise,
-      gapArrangement: GapArrangement.evenly,
+      gapArrangement: GapArrangement.valueList,
       partsCount: 4,
-      //gapsValues: [64.0, 78.0, 90.0],
+      gapsValues: [64.0, 78.0, 90.0],
       gapSizeDegree: 0.1,
       center: centerOffset,
       startAngle: startAngle,
@@ -191,11 +191,14 @@ class GaugeObject {
   void evenGapPathGenerator() {
     gaugePartObjects = <GaugePartObject>[];
     generateEvenArcAngles();
+    var eachPartValue = (endValue - startValue) / partsCount;
 
     for (var i = 0; i < arcAngles.length; i++) {
       gaugePartObjects.add(GaugePartObject(
-        startValue: 0.0,
-        endValue: 0.0,
+        startValue: i * eachPartValue,
+        endValue: i == arcAngles.length - 1
+            ? endValue
+            : (i * eachPartValue) + eachPartValue,
         fillDirection: fillDirection,
         center: center,
         startAngle: arcAngles[i].start,
@@ -211,12 +214,16 @@ class GaugeObject {
 
   void valuesListPathGenerator() {
     gaugePartObjects = <GaugePartObject>[];
-    generateNotEvenArcAngles();
+    var parts = generateNotEvenArcAngles();
 
     for (var i = 0; i < arcAngles.length; i++) {
+      var sum = 0.0;
+      for (var j = 0; j < i; j++) {
+        sum += parts[j];
+      }
       gaugePartObjects.add(GaugePartObject(
-        startValue: arcAngles[i].start,
-        endValue: arcAngles[i].end,
+        startValue: sum,
+        endValue: i == arcAngles.length - 1 ? endValue : sum + parts[i],
         fillDirection: fillDirection,
         center: center,
         startAngle: arcAngles[i].start,
@@ -246,7 +253,7 @@ class GaugeObject {
     }
   }
 
-  void generateNotEvenArcAngles() {
+  List<double> generateNotEvenArcAngles() {
     arcAngles = [];
     var sumOfGapsDegree = (gapsValues!.length) * gapSizeDegree;
     var totalAngle = endAngle - startAngle;
@@ -286,6 +293,8 @@ class GaugeObject {
       }
       index++;
     }
+
+    return parts;
   }
 }
 
