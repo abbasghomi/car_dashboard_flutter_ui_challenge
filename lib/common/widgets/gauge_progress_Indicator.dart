@@ -45,23 +45,9 @@ class GaugeProgressIndicator extends CustomPainter {
       ..isAntiAlias = true
       ..strokeCap = StrokeCap.butt;
 
-    // final paint = ColorTween(
-    //   begin: Colors.green,
-    //   end: Colors.red,
-    // );
-
-    // Offset offset = Offset(size.width / 2, size.height / 2);
-    // double radius = min(size.width / 2, size.height / 2);
-    // canvas.drawArc(Rect.fromCircle(center: offset, radius: radius), 2.5,
-    //     2 * pi * 0.7, false, bgLine);
-    // double sweepAngle = 2 * pi * percent;
-    // canvas.drawArc(Rect.fromCircle(center: offset, radius: radius), 2.5,
-    //     sweepAngle, false, completedLine);
-
     Paint paintBlue = Paint()
       ..color = Colors.blue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..style = PaintingStyle.fill;
     Paint paintGreen = Paint()
       ..color = Colors.green
       ..style = PaintingStyle.stroke
@@ -75,166 +61,175 @@ class GaugeProgressIndicator extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    // Path path1 = Path();
-    // path1.lineTo(0, (size.height *3/ 4));
-    // path1.quadraticBezierTo(0, (size.height *3/ 4), 1, (size.height *3/ 4)+1);
-    // path1.quadraticBezierTo(size.width / 2, size.height, size.width-1, (size.height*3/ 4)+1);
-    // path1.quadraticBezierTo(size.width-1 , (size.height *3/ 4)+1, size.width, size.height*3/ 4);
-    // path1. lineTo(size.width, 0);
-    // canvas.drawPath(path1, paint);
-
-
 
     Offset centerOffset = Offset(size.width / 2, size.height / 2);
 
     const startAngle = -120.0;
     const endAngle = -60.0;
 
-    ArcObject outerArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (3.5 * width / 100),
-      endAngle: endAngle - (3.5 * width / 100),
-      radius: min(size.width / 2, size.height / 2),
-      paint: paintBlue,
-    );
-    ArcObject outerHelperArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (3.3 * width / 100),
-      endAngle: endAngle - (3.3 * width / 100),
-      radius: min(size.width / 2, size.height / 2) - (width * 1 / 100),
-      paint: paintBlue,
-    );
-    ArcObject centerOuterArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (2.5 * width / 100),
-      endAngle: endAngle - (2.5 * width / 100),
-      radius: min(size.width / 2, size.height / 2) - (width * 10 / 100),
-      paint: paintBlue,
-    );
-    ArcObject centerArc = ArcObject(
+    GaugeObject gaugeObject = GaugeObject(
       center: centerOffset,
       startAngle: startAngle,
       endAngle: endAngle,
-      radius: min(size.width / 2, size.height / 2) - (width / 2),
-      paint: paintBlue,
-    );
-    ArcObject centerInnerArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (2.5 * width / 100),
-      endAngle: endAngle - (2.5 * width / 100),
-      radius: min(size.width / 2, size.height / 2) - width + (width * 10 / 100),
-      paint: paintBlue,
-    );
-    ArcObject innerHelperArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (3.3 * width / 100),
-      endAngle: endAngle - (3.3 * width / 100),
-      radius: min(size.width / 2, size.height / 2) - width + (width * 1 / 100),
-      paint: paintBlue,
-    );
-    ArcObject innerArc = ArcObject(
-      center: centerOffset,
-      startAngle: startAngle + (3.5 * width / 100),
-      endAngle: endAngle - (3.5 * width / 100),
-      radius: min(size.width / 2, size.height / 2) - width,
+      width: width,
+      boxSize: size,
       paint: paintBlue,
     );
 
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: outerArc.radius),
-        radians(outerArc.startAngle),
-        radians(outerArc.endAngle - outerArc.startAngle),
-        false,
-        paintBlue);
+    canvas.drawPath(gaugeObject.gaugeShapePath!, paintBlue);
 
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: outerHelperArc.radius),
-        radians(outerHelperArc.startAngle),
-        radians(outerHelperArc.endAngle - outerHelperArc.startAngle),
-        false,
-        paintGreen);
 
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: centerOuterArc.radius),
-        radians(centerOuterArc.startAngle),
-        radians(centerOuterArc.endAngle - centerOuterArc.startAngle),
-        false,
-        paintRed);
-
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: centerArc.radius),
-        radians(centerArc.startAngle),
-        radians(centerArc.endAngle - centerArc.startAngle),
-        false,
-        paintBlack);
-
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: centerInnerArc.radius),
-        radians(centerInnerArc.startAngle),
-        radians(centerInnerArc.endAngle - centerInnerArc.startAngle),
-        false,
-        paintRed);
-
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: innerHelperArc.radius),
-        radians(innerHelperArc.startAngle),
-        radians(innerHelperArc.endAngle - innerHelperArc.startAngle),
-        false,
-        paintGreen);
-
-    canvas.drawArc(
-        Rect.fromCircle(center: centerOffset, radius: innerArc.radius),
-        radians(innerArc.startAngle),
-        radians(innerArc.endAngle - innerArc.startAngle),
-        false,
-        paintBlue);
-
-    Path path1 = Path();
-    path1.moveTo(outerArc.arcPoints!.startX, outerArc.arcPoints!.startY);
-    path1.quadraticBezierTo(
-        outerHelperArc.arcPoints!.startX, outerHelperArc.arcPoints!.startY,
-        centerOuterArc.arcPoints!.startX, centerOuterArc.arcPoints!.startY);
-    path1.quadraticBezierTo(
-        centerArc.arcPoints!.startX, centerArc.arcPoints!.startY,
-        centerInnerArc.arcPoints!.startX, centerInnerArc.arcPoints!.startY);
-    path1.quadraticBezierTo(
-        innerHelperArc.arcPoints!.startX, innerHelperArc.arcPoints!.startY,
-        innerArc.arcPoints!.startX, innerArc.arcPoints!.startY);
-    canvas.drawPath(path1, paintRed);
-
-    Path path2 = Path();
-    path2.moveTo(outerArc.arcPoints!.endX, outerArc.arcPoints!.endY);
-    path2.quadraticBezierTo(
-        outerHelperArc.arcPoints!.endX, outerHelperArc.arcPoints!.endY,
-        centerOuterArc.arcPoints!.endX, centerOuterArc.arcPoints!.endY);
-    path2.quadraticBezierTo(
-        centerArc.arcPoints!.endX, centerArc.arcPoints!.endY,
-        centerInnerArc.arcPoints!.endX, centerInnerArc.arcPoints!.endY);
-    path2.quadraticBezierTo(
-        innerHelperArc.arcPoints!.endX, innerHelperArc.arcPoints!.endY,
-        innerArc.arcPoints!.endX, innerArc.arcPoints!.endY);
-    canvas.drawPath(path2, paintBlue);
-
-    // Path path = Path()..addArc(oval, startAngle, sweepAngle);
-
-    //
-    // secondPaint
-    //   ..color = Colors.black
-    //   ..shader = SweepGradient(
-    //     colors: const [
-    //       Colors.red,
-    //       Colors.green,
-    //     ],
-    //     startAngle: radians(0),
-    //     endAngle: radians(360),
-    //     transform:
-    //     GradientRotation(radians(0 - (360 / 1.5))),
-    //   ).createShader(secondRect);
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class GaugeObject {
+  final Offset center;
+  final double startAngle;
+  final double endAngle;
+  final double width;
+  final Size boxSize;
+  final Paint paint;
+  ArcObject? outerArc;
+  ArcObject? outerHelperArc;
+  ArcObject? centerOuterArc;
+  ArcObject? centerArc;
+  ArcObject? centerInnerArc;
+  ArcObject? innerHelperArc;
+  ArcObject? innerArc;
+  Path? gaugeShapePath;
+
+  GaugeObject({
+    required this.center,
+    required this.startAngle,
+    required this.endAngle,
+    required this.width,
+    required this.boxSize,
+    required this.paint,
+  }) {
+    outerArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (3.5 * width / 100),
+      endAngle: endAngle - (3.5 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2),
+      paint: paint,
+    );
+    outerHelperArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (3.3 * width / 100),
+      endAngle: endAngle - (3.3 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2) - (width * 1 / 100),
+      paint: paint,
+    );
+    centerOuterArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (2.5 * width / 100),
+      endAngle: endAngle - (2.5 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2) - (width * 10 / 100),
+      paint: paint,
+    );
+    centerArc = ArcObject(
+      center: center,
+      startAngle: startAngle,
+      endAngle: endAngle,
+      radius: min(boxSize.width / 2, boxSize.height / 2) - (width / 2),
+      paint: paint,
+    );
+    ArcObject centerInnerArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (2.5 * width / 100),
+      endAngle: endAngle - (2.5 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2) -
+          width +
+          (width * 10 / 100),
+      paint: paint,
+    );
+    innerHelperArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (3.3 * width / 100),
+      endAngle: endAngle - (3.3 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2) -
+          width +
+          (width * 1 / 100),
+      paint: paint,
+    );
+    innerArc = ArcObject(
+      center: center,
+      startAngle: startAngle + (3.5 * width / 100),
+      endAngle: endAngle - (3.5 * width / 100),
+      radius: min(boxSize.width / 2, boxSize.height / 2) - width,
+      paint: paint,
+    );
+
+    gaugeShapePath = Path()
+      ..moveTo(
+        outerArc!.arcPoints!.startX,
+        outerArc!.arcPoints!.startY,
+      )
+      ..quadraticBezierTo(
+          outerHelperArc!.arcPoints!.startX,
+          outerHelperArc!.arcPoints!.startY,
+          centerOuterArc!.arcPoints!.startX,
+          centerOuterArc!.arcPoints!.startY)
+      ..quadraticBezierTo(
+          centerArc!.arcPoints!.startX,
+          centerArc!.arcPoints!.startY,
+          centerInnerArc.arcPoints!.startX,
+          centerInnerArc.arcPoints!.startY)
+      ..quadraticBezierTo(
+          innerHelperArc!.arcPoints!.startX,
+          innerHelperArc!.arcPoints!.startY,
+          innerArc!.arcPoints!.startX,
+          innerArc!.arcPoints!.startY)
+      ..lineTo(
+        innerArc!.arcPoints!.startX,
+        innerArc!.arcPoints!.startY,
+      )
+      ..addArc(
+        Rect.fromCircle(center: center, radius: innerArc!.radius),
+        radians(innerArc!.startAngle),
+        radians(innerArc!.endAngle - innerArc!.startAngle),
+      )
+      ..lineTo(
+        innerArc!.arcPoints!.endX,
+        innerArc!.arcPoints!.endY,
+      )
+      ..quadraticBezierTo(
+          innerHelperArc!.arcPoints!.endX,
+          innerHelperArc!.arcPoints!.endY,
+          centerInnerArc.arcPoints!.endX,
+          centerInnerArc.arcPoints!.endY)
+      ..quadraticBezierTo(
+        centerArc!.arcPoints!.endX,
+        centerArc!.arcPoints!.endY,
+        centerOuterArc!.arcPoints!.endX,
+        centerOuterArc!.arcPoints!.endY,
+      )
+      ..quadraticBezierTo(
+        outerHelperArc!.arcPoints!.endX,
+        outerHelperArc!.arcPoints!.endY,
+        outerArc!.arcPoints!.endX,
+        outerArc!.arcPoints!.endY,
+      )
+      ..lineTo(
+        outerArc!.arcPoints!.endX,
+        outerArc!.arcPoints!.endY,
+      )
+      ..addArc(
+        Rect.fromCircle(center: center, radius: outerArc!.radius),
+        radians(outerArc!.endAngle),
+        radians(-1 * (outerArc!.endAngle-outerArc!.startAngle)),
+      )
+      ..lineTo(
+        outerArc!.arcPoints!.startX,
+        outerArc!.arcPoints!.startY,
+      )
+      ..close();
+
   }
 }
 
