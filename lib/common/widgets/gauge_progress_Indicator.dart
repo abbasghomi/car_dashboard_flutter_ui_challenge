@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math' show cos, max, min, pi, sin;
+import 'dart:math' show cos, min, sin, pi;
 import 'package:vector_math/vector_math.dart' show radians;
 
 enum FillDirection { clockWise, counterClockWise }
@@ -60,11 +60,6 @@ class GaugeProgressIndicator extends CustomPainter {
 
     Offset centerOffset = Offset(size.width / 2, size.height / 2);
 
-    const startAngle = -120.0;
-    const endAngle = -60.0;
-
-    //gapsAngles!=null && gapsAngles.length== partsCount -1 && partsCount > 1 && gapArrangement == GapArrangement.angleList
-
     var gaugeObject = GaugeObject(
       startValue: startValue,
       endValue: endValue,
@@ -84,9 +79,16 @@ class GaugeProgressIndicator extends CustomPainter {
       paint: paintBlue,
     );
 
-    int i = 0;
     for (var item in gaugeObject.gaugePartObjects) {
-      canvas.drawPath(item.gaugeShapePath!, paintBlue);
+
+      final paint = Paint();
+      paint.color = ColorTween(
+        begin: Colors.green,
+        end: Colors.red,
+      ).transform(radians(item.startAngle) / radians( endAngle))!;
+
+
+      canvas.drawPath(item.gaugeShapePath!, paint);
     }
   }
 
