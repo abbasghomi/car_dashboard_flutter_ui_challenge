@@ -19,6 +19,9 @@ class GaugeProgressIndicator extends CustomPainter {
   final double startValue;
   final double endValue;
 
+  final List<double>? gapsValues;
+  final int partsCount;
+
   GaugeProgressIndicator({
     required this.bgColor,
     required this.lineColor,
@@ -26,8 +29,10 @@ class GaugeProgressIndicator extends CustomPainter {
     required this.startValue,
     required this.endValue,
     required this.width,
+    required this.partsCount,
+    required this.gapArrangement,
+    this.gapsValues,
     this.fillDirection = FillDirection.clockWise,
-    this.gapArrangement = GapArrangement.evenly,
     this.startAngle = 0.0,
     this.endAngle = 359.0,
   });
@@ -65,9 +70,13 @@ class GaugeProgressIndicator extends CustomPainter {
       endValue: endValue,
       currentValue: currentValue,
       fillDirection: FillDirection.clockWise,
-      gapArrangement: GapArrangement.valueList,
-      partsCount: 4,
-      gapsValues: [64.0, 78.0, 90.0],
+      gapArrangement: gapArrangement,
+      partsCount: gapArrangement == GapArrangement.noGap
+          ? 1
+          : gapArrangement == GapArrangement.valueList
+              ? gapsValues!.length + 1
+              : partsCount,
+      gapsValues: gapArrangement == GapArrangement.noGap ? null : gapsValues,
       gapSizeDegree: 0.1,
       center: centerOffset,
       startAngle: startAngle,
@@ -80,16 +89,29 @@ class GaugeProgressIndicator extends CustomPainter {
     );
 
     for (var item in gaugeObject.gaugePartObjects) {
-
       final paint = Paint();
-      paint.color = ColorTween(
-        begin: Colors.green,
-        end: Colors.red,
-      ).transform(radians(item.startAngle) / radians( endAngle))!;
 
+      paint.shader = SweepGradient(
+        colors: const [
+          Colors.red,
+          Colors.green,
+          Colors.blue,
+        ],
+        stops: [
+          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![0]),
+          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![1]),
+          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![2]),
+        ],
+        startAngle: radians(startAngle.abs()),
+        //endAngle: radians(endAngle.abs()),
+      ).createShader(Rect.fromCircle(
+        center: centerOffset,
+        radius: min(size.width / 2, size.height / 2),
+      ));
 
       canvas.drawPath(item.gaugeShapePath!, paint);
     }
+
   }
 
   @override
@@ -138,9 +160,7 @@ class GaugeObject {
     this.partsCount = 1,
     this.gapSizeDegree = 1.0,
     this.gapsValues,
-  }) : assert((partsCount > 1 &&
-                gapArrangement != GapArrangement.noGap &&
-                gapsValues == null) ||
+  }) : assert((partsCount > 1 && gapArrangement != GapArrangement.noGap) ||
             (partsCount == 1 &&
                 gapArrangement == GapArrangement.noGap &&
                 gapsValues == null &&
@@ -157,6 +177,14 @@ class GaugeObject {
 
   double valueToDegree(double value, totalDegree) {
     return (value * totalDegree) / (endValue - startValue);
+  }
+
+  double valueToDegreeDefault(double value) {
+    return (value * endAngle) / (endValue - startValue);
+  }
+
+  double valueToColorStopValue(double value) {
+    return value / (endValue - startValue);
   }
 
   double degreeToValue(double degree) {
