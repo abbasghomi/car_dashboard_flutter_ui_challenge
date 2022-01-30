@@ -56,7 +56,7 @@ class GaugeProgressIndicator extends CustomPainter {
       ..strokeWidth = 1.0;
     Paint paintRed = Paint()
       ..color = Colors.red
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 1.0;
     Paint paintBlack = Paint()
       ..color = Colors.black
@@ -88,30 +88,113 @@ class GaugeProgressIndicator extends CustomPainter {
       paint: paintBlue,
     );
 
-    for (var item in gaugeObject.gaugePartObjects) {
-      final paint = Paint();
+    for (var i = 0; i < gaugeObject.gaugePartObjects.length; i++) {
+      // final paint = Paint();
+      // paint.color = ColorTween(
+      //   begin: Colors.green,
+      //   end: Colors.red,
+      // ).transform(radians(item.startAngle) / radians( endAngle))!;
+      // paint.color = ColorTween(
+      //   begin: Colors.black,
+      //   end: Colors.white,
+      // ).transform(item.startValue/(endValue-startValue))!;
+      // paint.shader =  SweepGradient(
+      //   startAngle: radians(0.0),
+      //   endAngle: radians(90.0),
+      //   tileMode: TileMode.repeated,
+      //   colors:const [Colors.black,Colors.white]
+      // ).createShader(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
 
-      paint.shader = SweepGradient(
-        colors: const [
-          Colors.red,
-          Colors.green,
-          Colors.blue,
-        ],
-        stops: [
-          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![0]),
-          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![1]),
-          gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![2]),
-        ],
-        startAngle: radians(startAngle.abs()),
-        //endAngle: radians(endAngle.abs()),
-      ).createShader(Rect.fromCircle(
-        center: centerOffset,
-        radius: min(size.width / 2, size.height / 2),
-      ));
+      // paint.shader = SweepGradient(
+      //   colors: const [
+      //     Colors.blue,
+      //     Colors.yellow,
+      //     //Colors.blue,
+      //   ],
+      //   stops: [
+      //     //gaugeObject.valueToColorStopValue(0),
+      //     gaugeObject.valueToColorStopValue(-gaugeObject.gapsValues![0]),
+      //     gaugeObject.valueToColorStopValue(endValue),
+      //     //gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![2]),
+      //   ],
+      //   startAngle: radians( startAngle),
+      //   //endAngle: radians(endAngle.abs()),
+      // ).createShader(Rect.fromCircle(
+      //   center: centerOffset,
+      //   radius: min(size.width / 2, size.height / 2),
+      // ));
 
-      canvas.drawPath(item.gaugeShapePath!, paint);
+      // paint .shader = SweepGradient(
+      //     colors: const [
+      //       Colors.black,
+      //       Colors.white,
+      //     ],
+      //   startAngle: radians(startAngle),
+      //   endAngle: radians(endAngle),
+      //   ).createShader(Rect.fromCircle(
+      //     center: centerOffset,
+      //     radius:  min(size.width / 2, size.height / 2),
+      //   ));
+      // paint .shader = const RadialGradient(
+      //     colors: [
+      //       Colors.black,
+      //       Colors.white,
+      //     ],
+      //   ).createShader(Rect.fromCircle(
+      //     center: centerOffset,
+      //     radius:  min(size.width / 2, size.height / 2),
+      //   ));
+
+      // Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+
+      // a fancy rainbow gradient
+      // final Gradient gradient = RadialGradient(
+      //   colors: <Color>[
+      //     Colors.green.withOpacity(1.0),
+      //     Colors.green.withOpacity(0.3),
+      //     Colors.yellow.withOpacity(0.2),
+      //     Colors.red.withOpacity(0.1),
+      //     Colors.red.withOpacity(0.0),
+      //   ],
+      //   stops: const [
+      //     0.0,
+      //     0.5,
+      //     0.7,
+      //     0.9,
+      //     1.0,
+      //   ],
+      // );
+
+      // create the Shader from the gradient and the bounding square
+      //final Paint paint = Paint()..shader = gradient.createShader(rect);
+
+      canvas.drawPath(
+          gaugeObject.gaugePartObjects[i].gaugeShapePath!, paintBlue);
+      if (gaugeObject.gaugeCurrentValuePartObjects.length > i) {
+        canvas.drawPath(
+            gaugeObject.gaugeCurrentValuePartObjects[i].gaugeShapePath!,
+            paintRed);
+      }
     }
 
+    // const gradient = SweepGradient(
+    //   startAngle: 3 * pi / 2,
+    //   endAngle: 7 * pi / 2,
+    //   tileMode: TileMode.repeated,
+    //   colors: [Colors.red, Colors.green],
+    // );
+    //
+    // final paint = Paint()
+    //   ..shader = gradient.createShader(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
+    //   ..strokeCap = StrokeCap.butt  // StrokeCap.round is not recommended.
+    //   ..style = PaintingStyle.stroke
+    //   ..strokeWidth = width;
+    // final center = Offset(size.width / 2, size.height / 2);
+    // final radius = min(size.width / 2, size.height / 2) - (width / 2);
+    // const startAngleX = -pi / 2;
+    // final sweepAngleX = 2 * pi * currentValue;
+    // canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
+    //     startAngleX, sweepAngleX, false, paint);
   }
 
   @override
@@ -139,6 +222,8 @@ class GaugeObject {
   final CapShape endCapShape;
 
   var gaugePartObjects = <GaugePartObject>[];
+  var gaugeCurrentValuePartObjects = <GaugePartObject>[];
+
   var arcAngles = <ArcAngle>[];
   var outerRadius = 0.0;
   var gapDegreeEqualValue = 0.0;
@@ -176,7 +261,7 @@ class GaugeObject {
   }
 
   double valueToDegree(double value, totalDegree) {
-    return (value * totalDegree) / (endValue - startValue);
+    return (value * totalDegree.abs()) / (endValue - startValue);
   }
 
   double valueToDegreeDefault(double value) {
@@ -194,10 +279,13 @@ class GaugeObject {
   void generateGaugeParts() {
     if (gapArrangement == GapArrangement.noGap) {
       noGapPathGenerator();
+      noGapCurrentValuePathGenerator();
     } else if (gapArrangement == GapArrangement.evenly) {
       evenGapPathGenerator();
+      evenGapCurrentValuePathGenerator();
     } else if (gapArrangement == GapArrangement.valueList) {
       valuesListPathGenerator();
+      valuesListCurrentValuePathGenerator();
     }
   }
 
@@ -326,6 +414,115 @@ class GaugeObject {
 
     return parts;
   }
+
+  void noGapCurrentValuePathGenerator() {
+    gaugeCurrentValuePartObjects = [];
+    gaugeCurrentValuePartObjects.add(GaugePartObject(
+      startValue: startValue,
+      endValue: startValue + currentValue,
+      //endValue,
+      fillDirection: fillDirection,
+      center: center,
+      startAngle: startAngle,
+      endAngle: startAngle + valueToDegree(currentValue, endAngle - startAngle),
+      width: width,
+      radius: outerRadius,
+      paint: paint,
+      startCapShape: CapShape.curve,
+      endCapShape: CapShape.curve,
+    ));
+  }
+
+  void evenGapCurrentValuePathGenerator() {
+    gaugeCurrentValuePartObjects = <GaugePartObject>[];
+    generateEvenArcAngles();
+    var eachPartValue = (endValue - startValue) / partsCount;
+
+    for (var i = 0; i < arcAngles.length; i++) {
+      var startValueTemp = i * eachPartValue;
+      var endValueTemp = i == arcAngles.length - 1
+          ? endValue
+          : (i * eachPartValue) + eachPartValue;
+
+      var startAngleTemp = arcAngles[i].start;
+      var endAngleTemp = arcAngles[i].end;
+
+      if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
+        var endAngleX =  startAngle + valueToDegree(currentValue, endAngle - startAngle);
+
+        startValueTemp = i * eachPartValue;
+        endValueTemp = currentValue;
+
+        startAngleTemp = arcAngles[i].start;
+        endAngleTemp = endAngleX;
+      }
+      gaugeCurrentValuePartObjects.add(GaugePartObject(
+        startValue: startValueTemp,
+        endValue: endValueTemp,
+        fillDirection: fillDirection,
+        center: center,
+        startAngle: startAngleTemp,
+        endAngle: endAngleTemp,
+        width: width,
+        radius: outerRadius,
+        paint: paint,
+        startCapShape: i == 0 ? startCapShape : CapShape.flat,
+        endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
+      ));
+      if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
+        break;
+      }
+    }
+  }
+
+  void valuesListCurrentValuePathGenerator() {
+    gaugeCurrentValuePartObjects = <GaugePartObject>[];
+    var parts = generateNotEvenArcAngles();
+
+    for (var i = 0; i < arcAngles.length; i++) {
+      var sum = 0.0;
+      for (var j = 0; j < i; j++) {
+        sum += parts[j];
+      }
+
+
+      var startValueTemp = sum;
+      var endValueTemp =  i == arcAngles.length - 1 ? endValue : sum + parts[i];
+
+      var startAngleTemp = arcAngles[i].start;
+      var endAngleTemp = arcAngles[i].end;
+
+      if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
+        var endAngleX =  startAngle + valueToDegree(currentValue, endAngle - startAngle);
+
+        startValueTemp = sum;
+        endValueTemp = currentValue;
+
+        startAngleTemp = arcAngles[i].start;
+        endAngleTemp = endAngleX;
+      }
+
+
+      gaugeCurrentValuePartObjects.add(GaugePartObject(
+        startValue: startValueTemp,
+        endValue: endValueTemp,
+        fillDirection: fillDirection,
+        center: center,
+        startAngle: startAngleTemp,
+        endAngle: endAngleTemp,
+        width: width,
+        radius: outerRadius,
+        paint: paint,
+        startCapShape: i == 0 ? startCapShape : CapShape.flat,
+        endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
+      ));
+
+      if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
+        break;
+      }
+    }
+
+  }
 }
 
 class GaugePartObject {
@@ -363,6 +560,9 @@ class GaugePartObject {
     required this.startCapShape,
     required this.endCapShape,
   }) {
+    if (startAngle == endAngle || startValue == endValue) {
+      return;
+    }
     outerArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.5 * width / 100),
