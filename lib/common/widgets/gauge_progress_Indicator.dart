@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'dart:math' show cos, min, sin, pi;
 import 'package:vector_math/vector_math.dart' show radians;
@@ -14,61 +15,59 @@ class GaugeProgressIndicator extends CustomPainter {
 
   final Color bgColor;
   final Color lineColor;
+  final Color textColor;
   final double width;
-  final double currentValue;
+  final double currentSpeed;
+  final double currentGear;
   final double startValue;
   final double endValue;
 
   final List<double>? gapsValues;
+  final List<Color>? fillColorValues;
   final int partsCount;
+
+  final ui.Image? image;
 
   GaugeProgressIndicator({
     required this.bgColor,
     required this.lineColor,
-    required this.currentValue,
+    required this.textColor,
+    required this.currentSpeed,
+    required this.currentGear,
     required this.startValue,
     required this.endValue,
     required this.width,
     required this.partsCount,
     required this.gapArrangement,
     this.gapsValues,
+    this.fillColorValues,
     this.fillDirection = FillDirection.clockWise,
     this.startAngle = 0.0,
     this.endAngle = 359.0,
-  });
+    this.image,
+  }) : assert((gapArrangement == GapArrangement.valueList &&
+                gapsValues != null &&
+                gapsValues.isNotEmpty &&
+                fillColorValues != null &&
+                fillColorValues.length == gapsValues.length + 1) ||
+            (gapArrangement == GapArrangement.noGap && partsCount == 1) ||
+            (gapArrangement == GapArrangement.evenly && partsCount > 1));
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint completedLine = Paint()
-      ..color = lineColor
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke
-      ..isAntiAlias = true
-      ..strokeCap = StrokeCap.butt;
-
-    Paint paintBlue = Paint()
-      ..color = Colors.blue
+    Paint indicatorBackPaint = Paint()
+      ..color = bgColor
       ..style = PaintingStyle.fill;
-    Paint paintGreen = Paint()
-      ..color = Colors.green
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    Paint paintRed = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 1.0;
-    Paint paintBlack = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+    Paint indicatorForegroundPaint = Paint()
+      ..color = lineColor
+      ..style = PaintingStyle.fill;
 
     Offset centerOffset = Offset(size.width / 2, size.height / 2);
 
     var gaugeObject = GaugeObject(
       startValue: startValue,
       endValue: endValue,
-      currentValue: currentValue,
+      currentValue: currentSpeed,
       fillDirection: FillDirection.clockWise,
       gapArrangement: gapArrangement,
       partsCount: gapArrangement == GapArrangement.noGap
@@ -77,7 +76,7 @@ class GaugeProgressIndicator extends CustomPainter {
               ? gapsValues!.length + 1
               : partsCount,
       gapsValues: gapArrangement == GapArrangement.noGap ? null : gapsValues,
-      gapSizeDegree: 0.1,
+      gapSizeDegree: 2.0,
       center: centerOffset,
       startAngle: startAngle,
       endAngle: endAngle,
@@ -85,121 +84,271 @@ class GaugeProgressIndicator extends CustomPainter {
       boxSize: size,
       startCapShape: CapShape.curve,
       endCapShape: CapShape.curve,
-      paint: paintBlue,
     );
 
     for (var i = 0; i < gaugeObject.gaugePartObjects.length; i++) {
-      // final paint = Paint();
-      // paint.color = ColorTween(
-      //   begin: Colors.green,
-      //   end: Colors.red,
-      // ).transform(radians(item.startAngle) / radians( endAngle))!;
-      // paint.color = ColorTween(
-      //   begin: Colors.black,
-      //   end: Colors.white,
-      // ).transform(item.startValue/(endValue-startValue))!;
-      // paint.shader =  SweepGradient(
-      //   startAngle: radians(0.0),
-      //   endAngle: radians(90.0),
-      //   tileMode: TileMode.repeated,
-      //   colors:const [Colors.black,Colors.white]
-      // ).createShader(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
-
-      // paint.shader = SweepGradient(
-      //   colors: const [
-      //     Colors.blue,
-      //     Colors.yellow,
-      //     //Colors.blue,
-      //   ],
-      //   stops: [
-      //     //gaugeObject.valueToColorStopValue(0),
-      //     gaugeObject.valueToColorStopValue(-gaugeObject.gapsValues![0]),
-      //     gaugeObject.valueToColorStopValue(endValue),
-      //     //gaugeObject.valueToColorStopValue(gaugeObject.gapsValues![2]),
-      //   ],
-      //   startAngle: radians( startAngle),
-      //   //endAngle: radians(endAngle.abs()),
-      // ).createShader(Rect.fromCircle(
-      //   center: centerOffset,
-      //   radius: min(size.width / 2, size.height / 2),
-      // ));
-
-      // paint .shader = SweepGradient(
-      //     colors: const [
-      //       Colors.black,
-      //       Colors.white,
-      //     ],
-      //   startAngle: radians(startAngle),
-      //   endAngle: radians(endAngle),
-      //   ).createShader(Rect.fromCircle(
-      //     center: centerOffset,
-      //     radius:  min(size.width / 2, size.height / 2),
-      //   ));
-      // paint .shader = const RadialGradient(
-      //     colors: [
-      //       Colors.black,
-      //       Colors.white,
-      //     ],
-      //   ).createShader(Rect.fromCircle(
-      //     center: centerOffset,
-      //     radius:  min(size.width / 2, size.height / 2),
-      //   ));
-
-      // Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
-
-      // a fancy rainbow gradient
-      // final Gradient gradient = RadialGradient(
-      //   colors: <Color>[
-      //     Colors.green.withOpacity(1.0),
-      //     Colors.green.withOpacity(0.3),
-      //     Colors.yellow.withOpacity(0.2),
-      //     Colors.red.withOpacity(0.1),
-      //     Colors.red.withOpacity(0.0),
-      //   ],
-      //   stops: const [
-      //     0.0,
-      //     0.5,
-      //     0.7,
-      //     0.9,
-      //     1.0,
-      //   ],
-      // );
-
-      // create the Shader from the gradient and the bounding square
-      //final Paint paint = Paint()..shader = gradient.createShader(rect);
-
       canvas.drawPath(
-          gaugeObject.gaugePartObjects[i].gaugeShapePath!, paintBlue);
-      if (gaugeObject.gaugeCurrentValuePartObjects.length > i) {
-        canvas.drawPath(
-            gaugeObject.gaugeCurrentValuePartObjects[i].gaugeShapePath!,
-            paintRed);
+          gaugeObject.gaugePartObjects[i].gaugeShapePath!, indicatorBackPaint);
+    }
+
+    if (gapArrangement == GapArrangement.noGap) {
+      for (var i = 0; i < gaugeObject.gaugePartObjects.length; i++) {
+        if (gaugeObject.gaugeCurrentValuePartObjects.length > i) {
+          canvas.drawPath(
+              gaugeObject.gaugeCurrentValuePartObjects[i].gaugeShapePath!,
+              indicatorForegroundPaint);
+        }
+      }
+    } else if (gapArrangement == GapArrangement.evenly) {
+      for (var i = 0; i < gaugeObject.gaugePartObjects.length; i++) {
+        if (gaugeObject.gaugeCurrentValuePartObjects.length > i) {
+          canvas.drawPath(
+              gaugeObject.gaugeCurrentValuePartObjects[i].gaugeShapePath!,
+              indicatorForegroundPaint);
+        }
+      }
+    }
+    if (gapArrangement == GapArrangement.valueList) {
+      var glowPaint = Paint()
+        ..color = textColor.withOpacity(0.5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0;
+
+      var paintList = <Paint>[];
+      for (var item in fillColorValues!) {
+        var tmpPaint = Paint()
+          ..color = item
+          ..style = PaintingStyle.fill;
+        paintList.add(tmpPaint);
+      }
+      for (var i = 0; i < gaugeObject.gaugePartObjects.length; i++) {
+        if (gaugeObject.gaugeCurrentValuePartObjects.length - 1 == i) {
+          var startX = gaugeObject
+              .gaugeCurrentValuePartObjects[i].outerArc!.arcPoints!.endX;
+          var startY = gaugeObject
+              .gaugeCurrentValuePartObjects[i].outerArc!.arcPoints!.endY;
+          var endX = gaugeObject
+              .gaugeCurrentValuePartObjects[i].innerArc!.arcPoints!.endX;
+          var endY = gaugeObject
+              .gaugeCurrentValuePartObjects[i].innerArc!.arcPoints!.endY;
+          var startGlowOffset = Offset(startX, startY);
+          var endGlowOffset = Offset(endX, endY);
+
+          canvas.drawLine(startGlowOffset, endGlowOffset, glowPaint);
+        }
+        if (gaugeObject.gaugeCurrentValuePartObjects.length > i) {
+          canvas.drawPath(
+              gaugeObject.gaugeCurrentValuePartObjects[i].gaugeShapePath!,
+              paintList[i]);
+        }
       }
     }
 
-    // const gradient = SweepGradient(
-    //   startAngle: 3 * pi / 2,
-    //   endAngle: 7 * pi / 2,
+    drawCenterContents(canvas, size, centerOffset);
+
+    drawGears(canvas, size, centerOffset);
+
+    // final rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+    // final gradient = SweepGradient(
+    //   startAngle: -2 * pi / 2,
+    //   endAngle: radians(128.0),
     //   tileMode: TileMode.repeated,
-    //   colors: [Colors.red, Colors.green],
+    //   colors: [Colors.white.withOpacity(0.0), Colors.white.withOpacity(1.0)],
     // );
     //
-    // final paint = Paint()
-    //   ..shader = gradient.createShader(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
-    //   ..strokeCap = StrokeCap.butt  // StrokeCap.round is not recommended.
+    // final paintxx = Paint()
+    //   ..shader = gradient.createShader(rect)
+    //   ..strokeCap = StrokeCap.butt // StrokeCap.round is not recommended.
     //   ..style = PaintingStyle.stroke
-    //   ..strokeWidth = width;
+    //   ..strokeWidth = 50;
     // final center = Offset(size.width / 2, size.height / 2);
-    // final radius = min(size.width / 2, size.height / 2) - (width / 2);
-    // const startAngleX = -pi / 2;
-    // final sweepAngleX = 2 * pi * currentValue;
-    // canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-    //     startAngleX, sweepAngleX, false, paint);
+    // final radius = min(size.width / 2, size.height / 2) - (width / 2) - 33.0;
+    // const startAnglex = -2 * pi / 2;
+    // var sweepAnglex = radians(128.0);
+    // canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAnglex,
+    //     sweepAnglex, false, paintxx);
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
+    return true;
+  }
+
+  drawCenterContents(Canvas canvas, Size size, Offset centerOffset) {
+    var textStyle =
+        TextStyle(color: textColor, fontSize: 140, fontWeight: FontWeight.bold);
+    var textSpan = TextSpan(
+      text: '$currentSpeed',
+      style: textStyle,
+    );
+    var textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    var xCenter = (size.width - textPainter.width) / 2;
+    var yCenter = (size.height - textPainter.height) / 2;
+    var offset = Offset(xCenter, yCenter);
+    textPainter.paint(canvas, offset);
+
+    textStyle = TextStyle(
+      color: textColor,
+      fontSize: 24,
+    );
+    textSpan = TextSpan(
+      text: 'MPH',
+      style: textStyle,
+    );
+    textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center);
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    xCenter = (size.width - textPainter.width) / 2;
+    yCenter = (size.height - textPainter.height) / 2;
+    offset = Offset(xCenter, yCenter + 80);
+
+    textPainter.paint(canvas, offset);
+
+    var startOffset = Offset(xCenter - 50.0, yCenter + 130);
+    var endOffset = Offset(xCenter + 110.0, yCenter + 130);
+
+    final gradient = LinearGradient(
+      colors: <Color>[
+        Colors.white.withOpacity(0.0),
+        Colors.white.withOpacity(0.5),
+        Colors.white.withOpacity(0.0),
+      ],
+      stops: const [
+        0.0,
+        0.5,
+        1.0,
+      ],
+    );
+
+    var rect = Rect.fromLTWH(xCenter - 40.0, yCenter + 130, 160, 2);
+    var tmpPaint = Paint()..shader = gradient.createShader(rect);
+
+    offset = Offset(xCenter, yCenter + 150.0);
+    canvas.drawLine(startOffset, endOffset, tmpPaint);
+    offset = Offset(xCenter - 30.0, yCenter + 150.0);
+    canvas.drawImage(image!, offset, Paint());
+
+    textStyle = TextStyle(
+      color: textColor,
+      fontSize: 42,
+      fontWeight: FontWeight.bold,
+    );
+    textSpan = TextSpan(
+      text: '34',
+      style: textStyle,
+    );
+    textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center);
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    xCenter = (size.width - textPainter.width) / 2;
+    yCenter = (size.height + 150 - textPainter.height) / 2;
+    offset = Offset(xCenter + 2, yCenter + 73);
+
+    textPainter.paint(canvas, offset);
+
+    textStyle = TextStyle(
+      color: textColor,
+      fontSize: 16,
+    );
+    textSpan = TextSpan(
+      text: 'MPH',
+      style: textStyle,
+    );
+    textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center);
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    xCenter = (size.width - textPainter.width) / 2;
+    yCenter = (size.height + 150 - textPainter.height) / 2;
+    offset = Offset(xCenter + 50.0, yCenter + 72);
+
+    textPainter.paint(canvas, offset);
+  }
+
+  drawGears(Canvas canvas, Size size, Offset centerOffset) {
+    var defaultGearTextStyle =
+        TextStyle(color: bgColor, fontSize: 16, fontWeight: FontWeight.bold);
+    var selectedGearTextStyle =
+        TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold);
+    var textSpan = TextSpan(
+      text: '',
+      style: selectedGearTextStyle,
+    );
+    var textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    var gearSelectedCirclePaint = Paint()
+      ..color = lineColor
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 6.0
+      ..style = PaintingStyle.stroke
+      ..isAntiAlias = true
+      ..strokeCap = StrokeCap.butt;
+    var gearTextArcRadius = min(size.width / 2, size.height / 2) + 70.0;
+    var gearStartDegree = -210.0;
+    var gearStepDegree = 15.0;
+    var gearEndDegree = gearStartDegree + gearStepDegree * 5;
+    var gearNames = <String>['B', 'P', 'D', 'N', 'R'];
+    var counter = 0;
+    for (var i = 0; i < 5; i++) {
+      var arc = ArcObject(
+          center: centerOffset,
+          startAngle: gearStartDegree + (gearStepDegree * i),
+          endAngle: gearStartDegree + (gearStepDegree * i),
+          radius: gearTextArcRadius);
+      if (counter == currentGear) {
+        textSpan = TextSpan(
+          text: gearNames[counter],
+          style: selectedGearTextStyle,
+        );
+      } else {
+        textSpan = TextSpan(
+          text: gearNames[counter],
+          style: defaultGearTextStyle,
+        );
+      }
+
+      textPainter = TextPainter(
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.center);
+      textPainter.layout(
+        minWidth: 0,
+        maxWidth: size.width,
+      );
+
+      var offset = Offset(arc.arcPoints!.startX - textPainter.width / 2,
+          arc.arcPoints!.startY - textPainter.height / 2);
+      textPainter.paint(canvas, offset);
+      offset = Offset(arc.arcPoints!.startX, arc.arcPoints!.startY);
+      if (counter == currentGear) {
+        canvas.drawCircle(offset, 30.0, gearSelectedCirclePaint);
+      }
+      counter++;
+    }
   }
 }
 
@@ -212,7 +361,6 @@ class GaugeObject {
   final double endAngle;
   final double width;
   final Size boxSize;
-  final Paint paint;
   final int partsCount;
   final double gapSizeDegree;
   final List<double>? gapsValues;
@@ -237,7 +385,6 @@ class GaugeObject {
     required this.endAngle,
     required this.width,
     required this.boxSize,
-    required this.paint,
     required this.fillDirection,
     required this.gapArrangement,
     required this.startCapShape,
@@ -300,7 +447,6 @@ class GaugeObject {
       endAngle: endAngle,
       width: width,
       radius: outerRadius,
-      paint: paint,
       startCapShape: CapShape.curve,
       endCapShape: CapShape.curve,
     ));
@@ -323,7 +469,6 @@ class GaugeObject {
         endAngle: arcAngles[i].end,
         width: width,
         radius: outerRadius,
-        paint: paint,
         startCapShape: i == 0 ? startCapShape : CapShape.flat,
         endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
       ));
@@ -348,7 +493,6 @@ class GaugeObject {
         endAngle: arcAngles[i].end,
         width: width,
         radius: outerRadius,
-        paint: paint,
         startCapShape: i == 0 ? startCapShape : CapShape.flat,
         endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
       ));
@@ -427,7 +571,6 @@ class GaugeObject {
       endAngle: startAngle + valueToDegree(currentValue, endAngle - startAngle),
       width: width,
       radius: outerRadius,
-      paint: paint,
       startCapShape: CapShape.curve,
       endCapShape: CapShape.curve,
     ));
@@ -448,7 +591,8 @@ class GaugeObject {
       var endAngleTemp = arcAngles[i].end;
 
       if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
-        var endAngleX =  startAngle + valueToDegree(currentValue, endAngle - startAngle);
+        var endAngleX =
+            startAngle + valueToDegree(currentValue, endAngle - startAngle);
 
         startValueTemp = i * eachPartValue;
         endValueTemp = currentValue;
@@ -465,7 +609,6 @@ class GaugeObject {
         endAngle: endAngleTemp,
         width: width,
         radius: outerRadius,
-        paint: paint,
         startCapShape: i == 0 ? startCapShape : CapShape.flat,
         endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
       ));
@@ -485,15 +628,15 @@ class GaugeObject {
         sum += parts[j];
       }
 
-
       var startValueTemp = sum;
-      var endValueTemp =  i == arcAngles.length - 1 ? endValue : sum + parts[i];
+      var endValueTemp = i == arcAngles.length - 1 ? endValue : sum + parts[i];
 
       var startAngleTemp = arcAngles[i].start;
       var endAngleTemp = arcAngles[i].end;
 
       if (currentValue >= startValueTemp && currentValue <= endValueTemp) {
-        var endAngleX =  startAngle + valueToDegree(currentValue, endAngle - startAngle);
+        var endAngleX =
+            startAngle + valueToDegree(currentValue, endAngle - startAngle);
 
         startValueTemp = sum;
         endValueTemp = currentValue;
@@ -501,7 +644,6 @@ class GaugeObject {
         startAngleTemp = arcAngles[i].start;
         endAngleTemp = endAngleX;
       }
-
 
       gaugeCurrentValuePartObjects.add(GaugePartObject(
         startValue: startValueTemp,
@@ -512,7 +654,6 @@ class GaugeObject {
         endAngle: endAngleTemp,
         width: width,
         radius: outerRadius,
-        paint: paint,
         startCapShape: i == 0 ? startCapShape : CapShape.flat,
         endCapShape: i < arcAngles.length - 1 ? CapShape.flat : endCapShape,
       ));
@@ -521,7 +662,6 @@ class GaugeObject {
         break;
       }
     }
-
   }
 }
 
@@ -531,7 +671,6 @@ class GaugePartObject {
   final double endAngle;
   final double width;
   final double radius;
-  final Paint paint;
   final FillDirection fillDirection;
   final CapShape startCapShape;
   final CapShape endCapShape;
@@ -555,60 +694,51 @@ class GaugePartObject {
     required this.endAngle,
     required this.width,
     required this.radius,
-    required this.paint,
     required this.fillDirection,
     required this.startCapShape,
     required this.endCapShape,
   }) {
-
     outerArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.5 * width / 100),
       endAngle: endAngle - (3.5 * width / 100),
       radius: radius,
-      paint: paint,
     );
     outerHelperArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.3 * width / 100),
       endAngle: endAngle - (3.3 * width / 100),
       radius: radius - (width * 1 / 100),
-      paint: paint,
     );
     centerOuterArc = ArcObject(
       center: center,
       startAngle: startAngle + (2.5 * width / 100),
       endAngle: endAngle - (2.5 * width / 100),
       radius: radius - (width * 10 / 100),
-      paint: paint,
     );
     centerArc = ArcObject(
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
       radius: radius - (width / 2),
-      paint: paint,
     );
     centerInnerArc = ArcObject(
       center: center,
       startAngle: startAngle + (2.5 * width / 100),
       endAngle: endAngle - (2.5 * width / 100),
       radius: radius - width + (width * 10 / 100),
-      paint: paint,
     );
     innerHelperArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.3 * width / 100),
       endAngle: endAngle - (3.3 * width / 100),
       radius: radius - width + (width * 1 / 100),
-      paint: paint,
     );
     innerArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.5 * width / 100),
       endAngle: endAngle - (3.5 * width / 100),
       radius: radius - width,
-      paint: paint,
     );
 
     gaugeShapePath = Path()
@@ -682,14 +812,12 @@ class ArcObject {
   final double endAngle;
   final double radius;
   ArcPoint? arcPoints;
-  final Paint paint;
 
   ArcObject({
     required this.center,
     required this.startAngle,
     required this.endAngle,
     required this.radius,
-    required this.paint,
   }) {
     arcPoints = getArcStartAndEndPoints(
       center.dx,

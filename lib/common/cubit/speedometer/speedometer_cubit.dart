@@ -41,7 +41,7 @@ class SpeedometerCubit extends Cubit<SpeedometerState> {
   }
 
   Future<void> gearUp() async {
-    if (_gear < 5) {
+    if (_gear < 4) {
       emit(BusyState());
       _gear += increamentalValue;
       emit(GearUpdatedState());

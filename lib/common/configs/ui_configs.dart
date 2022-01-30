@@ -16,7 +16,7 @@ class UiConfigs{
 
   //colors
   static Color get whiteTextColor => Colors.white;
-  static Color get pageBackColor => const Color(0xFF00172E);
+  static Color get pageBackColor => const Color(0xFF303136);
   static Color get descriptionTextColor => const Color(0x99FFFFFF);
   static Color get backgroundColor => const Color(0xFF303136);
   static Color get titleTextColor => const Color(0xFFe4e5e9);

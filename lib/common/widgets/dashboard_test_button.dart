@@ -8,11 +8,13 @@ class DashboardTestButton extends StatefulWidget {
     required this.buttonText,
     required this.backgroundColor,
     required this.onTapDown,
+    required this.enableContinuousTap,
   }) : super(key: key);
 
   final Function onTapDown;
   final String buttonText;
   final Color backgroundColor;
+  final bool enableContinuousTap;
 
   @override
   State<DashboardTestButton> createState() => _DashboardTestButtonState();
@@ -25,15 +27,23 @@ class _DashboardTestButtonState extends State<DashboardTestButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (TapDownDetails details) {
-        _timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+        if (widget.enableContinuousTap) {
+          _timer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+            widget.onTapDown();
+          });
+        } else {
           widget.onTapDown();
-        });
+        }
       },
       onTapUp: (TapUpDetails details) {
-        _timer!.cancel();
+        if (widget.enableContinuousTap) {
+          _timer!.cancel();
+        }
       },
       onTapCancel: () {
-        _timer!.cancel();
+        if (widget.enableContinuousTap) {
+          _timer!.cancel();
+        }
       },
       child: Container(
         width: 100.0,
