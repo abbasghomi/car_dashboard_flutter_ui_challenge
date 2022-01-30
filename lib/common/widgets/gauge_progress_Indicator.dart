@@ -560,9 +560,7 @@ class GaugePartObject {
     required this.startCapShape,
     required this.endCapShape,
   }) {
-    if (startAngle == endAngle || startValue == endValue) {
-      return;
-    }
+
     outerArc = ArcObject(
       center: center,
       startAngle: startAngle + (3.5 * width / 100),
